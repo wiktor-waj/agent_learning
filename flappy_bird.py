@@ -1,8 +1,9 @@
+""" Simple flappy bird game implementation """
 import pygame
-from pygame.locals import *
 from PIL import Image  # to get dimentions of asset images
 
 
+# from pygame.locals import *
 pygame.init()
 
 # define framerate for the game so that events are synchronized
@@ -15,9 +16,10 @@ background_width, background_height = background.get_size()
 base = pygame.image.load("assets/img/base.png")
 base_width, base_height = base.get_size()
 bird_images = (
-        'assets/img/bird_upflap.png',
-        'assets/img/bird_midflap.png',
-        'assets/img/bird_downflap.png')
+    "assets/img/bird_upflap.png",
+    "assets/img/bird_midflap.png",
+    "assets/img/bird_downflap.png",
+)
 
 # set screen size based on background and base
 screen_width = background_width
@@ -47,17 +49,16 @@ class Bird(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = [x, y]
 
-    def update(self): # overwritten sprite function
-        """ Handles Bird animation"""
+    def update(self):  # overwritten sprite function
+        """Handles Bird animation"""
         self.counter += 1
         flap_cooldown = 5
 
         if self.counter > flap_cooldown:
             self.counter = 0
             self.index += 1
-            self.index  %= len(self.images)
+            self.index %= len(self.images)
             self.image = self.images[self.index]
-
 
 
 bird_group = pygame.sprite.Group()
