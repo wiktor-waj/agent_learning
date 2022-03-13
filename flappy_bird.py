@@ -30,15 +30,29 @@ screen_height = background_height + base_height
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Flappy Bird")
 
+# define font for displaying score
+font = pygame.font.SysFont("Bauhaus 93", 60)
+
+# define colors
+white = (255, 255, 255)
+
 # define game variables
 base_move = 0
 MOVE_SPEED = 6  # by how much pixels to move a base in a single frame
 BASE_COLUMN_WIDTH = 24  # width of a single "column" of a base in pixels
-flying = False
+flying = False  # bool for checking flying animation
 game_over = False
-pipe_gap = 150
-pipe_frequency = 1000 # 1 second
+pipe_gap = 150  # the size of gap between top and bottom pipes
+pipe_frequency = 1000  # 1 second between generating new pipes
 last_pipe = pygame.time.get_ticks() - pipe_frequency
+score = 0
+was_pipe_passed = False
+
+
+def draw_text(text, font, text_color, x, y):
+    img = font.render(text, True, text_color)
+    screen.blit(img, (x, y))
+
 
 class Bird(pygame.sprite.Sprite):
     """Bird Sprite that is controlled by the player"""
@@ -147,8 +161,26 @@ while True:
     # draw the ground
     screen.blit(base, (base_move, background_height))
 
+    # check score
+    if len(pipe_group) > 0:  # some pipes have been created
+        if (
+            bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.left
+            and bird_group.sprites()[0].rect.right < pipe_group.sprites()[0].rect.right
+            and was_pipe_passed == False
+        ):  # bird is between top and bottom pipe
+            was_pipe_passed = True
+        if was_pipe_passed == True:
+            # and if bird has left the area between top and bottom pipe
+            if bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.right:
+                score += 1
+                was_pipe_passed = False
+    draw_text(str(score), font, white, int(screen_width / 2), 30)
+
     # check if any collision occured
-    if pygame.sprite.groupcollide(bird_group, pipe_group, False, False) or flappy.rect.top < 0:
+    if (
+        pygame.sprite.groupcollide(bird_group, pipe_group, False, False)
+        or flappy.rect.top < 0
+    ):
         game_over = True
     # check if the bird hit the ground
     if flappy.rect.bottom >= background_height:
