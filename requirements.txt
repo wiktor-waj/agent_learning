@@ -1,24 +1,2 @@
-astroid==2.9.3
-black==22.1.0
-click==8.0.4
-cloudpickle==2.0.0
-gym==0.22.0
-gym-notices==0.0.4
-importlib-metadata==4.11.2
-isort==5.10.1
-keras==2.8.0
-lazy-object-proxy==1.7.1
-mccabe==0.6.1
-mypy-extensions==0.4.3
-numpy==1.22.2
-pathspec==0.9.0
-Pillow==9.0.1
-platformdirs==2.5.1
--e git+https://github.com/ntasfi/PyGame-Learning-Environment@3dbe79dc0c35559bb441b9359948aabf9bb3d331#egg=ple
 pygame==2.1.2
 pylint==2.12.2
-toml==0.10.2
-tomli==2.0.1
-typing_extensions==4.1.1
-wrapt==1.13.3
-zipp==3.7.0
