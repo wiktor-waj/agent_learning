@@ -3,6 +3,7 @@
 import sys
 import random
 import pygame
+import argparse
 
 from agent import Agent
 
@@ -24,17 +25,35 @@ RESTART_IMAGE = pygame.image.load(RESTART_IMAGE_PATH)
 SCREEN_WIDTH = BACKGROUND_WIDTH
 SCREEN_HEIGHT = BACKGROUND_HEIGHT + BASE_IMAGE_HEIGHT
 
-# initialize the agent
-agent = Agent()
-
 
 def main():
-    global FRAMERATE, CLOCK, SCREEN, agent
+    global FRAMERATE, CLOCK, SCREEN, ITER, DEBUG, agent
     pygame.init()
+
+    parser = argparse.ArgumentParser("flappy_bird.py")
+    parser.add_argument(
+        "--iter", type=int, default=1000, help="number of game iterations to run"
+    )
+    parser.add_argument(
+        "--debug", action="store_true", help="output debug logs to stdout"
+    )
+    parser.add_argument(
+        "--fps",
+        type=int,
+        choices=[30, 60, 120],
+        default=120,
+        help="Frames per second; 30 = normal, 60 = fast, 120 = very fast",
+    )
+    arguments = parser.parse_args()
 
     # define framerate for the game so that events are synchronized
     CLOCK = pygame.time.Clock()
-    FRAMERATE = 60
+    FRAMERATE = arguments.fps
+    DEBUG = arguments.debug
+    ITER = arguments.iter
+
+    # initialize the agent
+    agent = Agent(DEBUG)
 
     # create game window
     SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -62,6 +81,13 @@ def reset_game(flappy, bottom_pipe_group, top_pipe_group):
 
     score = 0
     return game_over, score
+
+
+def end_game():
+    """Dumping agent's qvalues, creating plotted graphs and ending the game"""
+    agent.dump_qvalues(force=True)
+    pygame.quit()
+    sys.exit()
 
 
 def generate_pipes(bottom_pipe_group, top_pipe_group, PIPE_GAP):
@@ -114,7 +140,7 @@ class Bird(pygame.sprite.Sprite):
             # if pygame.mouse.get_pressed()[0] == 0:
             #    self.lmb_pressed = False
 
-            #if agent_clicked is True:
+            # if agent_clicked is True:
             #    agent_clicked = False
             #    self.velocity = -10
 
@@ -196,10 +222,10 @@ class Button:
 def mainGame():
     # define game variables
     BASE_MOVE = 0
-    MOVE_SPEED = 6  # by how much pixels to move a base in a single frame
+    MOVE_SPEED = 7  # by how much pixels to move a base in a single frame
     BASE_COLUMN_WIDTH = 24  # width of a single "column" of a base in pixels
     PIPE_GAP = 150  # the size of gap between top and bottom pipes
-    PIPE_FREQUENCY = 450  # 900ms between generating new pipes
+    PIPE_FREQUENCY = 900 * (30 / FRAMERATE)  # 900ms between generating new pipes
     score = 0
     last_pipe = pygame.time.get_ticks() - PIPE_FREQUENCY
     game_over = False
@@ -261,7 +287,8 @@ def mainGame():
         ):
             agent_clicked = True
             flappy.velocity = -10
-            print("Agent clicked")
+            if DEBUG:
+                print("Agent clicked")
 
         # draw and update bird
         bird_group.draw(SCREEN)
@@ -313,7 +340,8 @@ def mainGame():
             top_pipe_group.update(MOVE_SPEED)
 
         if game_over is True:
-            print("Game over, updating scores")
+            if DEBUG:
+                print("Game over, updating scores")
             agent.update_scores()
             game_over, score = reset_game(flappy, bottom_pipe_group, top_pipe_group)
             # restart_button.draw()
@@ -323,11 +351,12 @@ def mainGame():
         # event handling
         for event in pygame.event.get():
             # stop running the game if ESC is pressed
-            if event.type == pygame.QUIT or (
-                event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
+            if (
+                event.type == pygame.QUIT
+                or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE)
+                or agent.game_count == iter
             ):
-                pygame.quit()
-                sys.exit()
+                end_game()
             # start game
             # if (
             #    event.type == pygame.MOUSEBUTTONDOWN

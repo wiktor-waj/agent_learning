@@ -9,7 +9,7 @@ class Agent(object):
     After every DUMPING_N iterations, dumps the  values to the local JSON file
     """
 
-    def __init__(self):
+    def __init__(self, debug):
         self.game_count = 0  # Game count of current run, incremented after every death
         self.DUMPING_N = 25  # Number of iterations to dump Q values to JSON after
         self.discount = 1.0
@@ -19,6 +19,7 @@ class Agent(object):
         self.last_state = "500_280_0"
         self.last_action = 0
         self.moves = []
+        self.debug = debug
 
     def load_qvalues(self):
         """
@@ -88,19 +89,22 @@ class Agent(object):
         Map the (xdif, ydif, vel) to the respective state, with regards to the grids
         The state is a string, "xdif_ydif_vel"
         """
-        print(f"Xdif: {xdif};  Ydif: {ydif};   Vel: {vel}")
+        if self.debug:
+            print(f"Xdif: {xdif};  Ydif: {ydif};   Vel: {vel}")
         xdif = int(xdif) - (int(xdif) % 10)
         ydif = int(ydif) - (int(ydif) % 10)
 
         state = str(int(xdif)) + "_" + str(int(ydif)) + "_" + str(vel)
-        print(f"Curr state: {state}")
+        if self.debug:
+            print(f"Curr state: {state}")
         return state
 
     def dump_qvalues(self, force=False):
         """
         Dump the qvalues to the JSON file
         """
-        print(f"game count: {self.game_count}")
+        if self.debug:
+            print(f"game count: {self.game_count}")
         if self.game_count % self.DUMPING_N == 0 or force:
             fil = open("data/qvalues.json", "w")
             json.dump(self.qvalues, fil)
