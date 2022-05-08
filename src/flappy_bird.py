@@ -34,7 +34,7 @@ def main():
 
     # define framerate for the game so that events are synchronized
     CLOCK = pygame.time.Clock()
-    FRAMERATE = 30
+    FRAMERATE = 60
 
     # create game window
     SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -199,7 +199,7 @@ def mainGame():
     MOVE_SPEED = 6  # by how much pixels to move a base in a single frame
     BASE_COLUMN_WIDTH = 24  # width of a single "column" of a base in pixels
     PIPE_GAP = 150  # the size of gap between top and bottom pipes
-    PIPE_FREQUENCY = 900  # 900ms between generating new pipes
+    PIPE_FREQUENCY = 450  # 900ms between generating new pipes
     score = 0
     last_pipe = pygame.time.get_ticks() - PIPE_FREQUENCY
     game_over = False

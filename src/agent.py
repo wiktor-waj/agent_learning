@@ -87,9 +87,6 @@ class Agent(object):
         """
         Map the (xdif, ydif, vel) to the respective state, with regards to the grids
         The state is a string, "xdif_ydif_vel"
-
-        X -> [-40,-30...120] U [140, 210 ... 420]
-        Y -> [-300, -290 ... 160] U [180, 240 ... 420]
         """
         print(f"Xdif: {xdif};  Ydif: {ydif};   Vel: {vel}")
         xdif = int(xdif) - (int(xdif) % 10)
