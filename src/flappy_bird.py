@@ -113,7 +113,7 @@ def end_game(scores, scores_avarages):
     if DEBUG:
         print(f"Max score {max_score} at game {max_game_index}")
         print(f"Avarage at the end: {scores_avarages[-1]}")
-    plt.scatter(x, y, color="black", marker=".", s=40)
+    plt.scatter(x, y, color="black", marker=".", s=20)
     plt.scatter(
         max_game_index,
         max_score,
