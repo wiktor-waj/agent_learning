@@ -4,8 +4,21 @@ import sys
 import random
 import pygame
 import argparse
-
+import matplotlib
+import matplotlib.pyplot as plt
 from agent import Agent
+
+# settings for matplotlib so we can export graphs to latex
+matplotlib.use("pgf")
+matplotlib.rcParams.update(
+    {
+        "pgf.texsystem": "pdflatex",
+        "font.family": "serif",
+        "text.usetex": True,
+        "pgf.rcfonts": False,
+    }
+)
+
 
 # load images and their sizes
 BACKGROUND = pygame.image.load("assets/img/background.png")
@@ -30,6 +43,7 @@ def main():
     global FRAMERATE, CLOCK, SCREEN, ITER, DEBUG, agent
     pygame.init()
 
+    # parse command line arguments
     parser = argparse.ArgumentParser("flappy_bird.py")
     parser.add_argument(
         "--iter", type=int, default=1000, help="number of game iterations to run"
@@ -83,10 +97,46 @@ def reset_game(flappy, bottom_pipe_group, top_pipe_group):
     return game_over, score
 
 
-def end_game():
+def append_scores(scores, scores_avarages, score):
+    scores.append(score)
+    scores_avarages.append(sum(scores) / len(scores))
+
+
+def end_game(scores, scores_avarages):
     """Dumping agent's qvalues, creating plotted graphs and ending the game"""
     agent.dump_qvalues(force=True)
     pygame.quit()
+    y = scores
+    x = [i + 1 for i in range(len(y))]
+    max_score = max(scores)
+    max_game_index = scores.index(max_score) + 1
+    if DEBUG:
+        print(f"Max score {max_score} at game {max_game_index}")
+        print(f"Avarage at the end: {scores_avarages[-1]}")
+    plt.scatter(x, y, color="black", marker=".", s=40)
+    plt.scatter(
+        max_game_index,
+        max_score,
+        color="red",
+        marker=".",
+        s=60,
+        label=f"Max score",
+    )
+    plt.plot(x, scores_avarages, color="blue", label="Avarage", linewidth=2)
+    plt.xlabel("Game")
+    plt.ylabel("Score")
+    # plt.xticks(x)
+    # plt.yticks(scores)
+    plt.legend()
+    plt.savefig("data/scores.png", dpi=400)
+    plt.savefig("data/scores.pgf")
+    with open("data/scores.txt", 'w', encoding = 'utf-8') as f:
+        f.write(f"Max score: {max_score} at game: {max_game_index}\n")
+        f.write(f"Avarage at the end: {scores_avarages[-1]}\n")
+        f.write("Scores:\n")
+        f.write(f"{scores}\n")
+        f.write("Avarages:\n")
+        f.write(f"{scores_avarages}")
     sys.exit()
 
 
@@ -227,6 +277,8 @@ def mainGame():
     PIPE_GAP = 150  # the size of gap between top and bottom pipes
     PIPE_FREQUENCY = 900 * (30 / FRAMERATE)  # 900ms between generating new pipes
     score = 0
+    scores = []
+    scores_avarages = []
     last_pipe = pygame.time.get_ticks() - PIPE_FREQUENCY
     game_over = False
     agent_clicked = False
@@ -343,6 +395,7 @@ def mainGame():
             if DEBUG:
                 print("Game over, updating scores")
             agent.update_scores()
+            append_scores(scores, scores_avarages, score)
             game_over, score = reset_game(flappy, bottom_pipe_group, top_pipe_group)
             # restart_button.draw()
             # if restart_button.is_button_clicked() is True:
@@ -351,12 +404,11 @@ def mainGame():
         # event handling
         for event in pygame.event.get():
             # stop running the game if ESC is pressed
-            if (
-                event.type == pygame.QUIT
-                or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE)
-                or agent.game_count == iter
+            if event.type == pygame.QUIT or (
+                event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
             ):
-                end_game()
+                append_scores(scores, scores_avarages, score)
+                end_game(scores, scores_avarages)
             # start game
             # if (
             #    event.type == pygame.MOUSEBUTTONDOWN
@@ -364,6 +416,10 @@ def mainGame():
             #    and game_over is False
             # ):
             #    flying = True
+
+        # end game if we have reached game iterations
+        if agent.game_count == ITER:
+            end_game(scores, scores_avarages)
 
         # update everything that has happened to the game
         pygame.display.update()

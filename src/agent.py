@@ -103,9 +103,8 @@ class Agent(object):
         """
         Dump the qvalues to the JSON file
         """
-        if self.debug:
-            print(f"game count: {self.game_count}")
         if self.game_count % self.DUMPING_N == 0 or force:
+            print(f"game count: {self.game_count}")
             fil = open("data/qvalues.json", "w")
             json.dump(self.qvalues, fil)
             fil.close()
