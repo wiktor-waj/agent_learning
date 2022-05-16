@@ -101,8 +101,8 @@ class Agent(object):
         """
         if self.debug:
             print(f"Xdif: {xdif};  Ydif: {ydif};   Vel: {vel}")
-        xdif = int(xdif) - (int(xdif) % 10)
-        ydif = int(ydif) - (int(ydif) % 10)
+        xdif = int(xdif) - (int(xdif) % 5)
+        ydif = int(ydif) - (int(ydif) % 5)
 
         state = str(int(xdif)) + "_" + str(int(ydif)) + "_" + str(vel)
         if self.debug:
