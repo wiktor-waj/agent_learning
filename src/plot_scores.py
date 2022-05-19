@@ -5,11 +5,6 @@ import math
 import argparse
 import os
 
-# design -> arg1 plik z danymi -> scores.txt
-# defaultowo data/scores.txt
-# arg2 sciezka do folderu do zapisu danych :)
-# defaultowo data/
-
 # settings for matplotlib so we can export graphs to latex
 matplotlib.use("pgf")
 matplotlib.rcParams.update(
