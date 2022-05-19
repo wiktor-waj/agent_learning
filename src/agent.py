@@ -59,6 +59,13 @@ class Agent(object):
         """
         history = list(reversed(self.moves))
 
+        # if bird died to collapsing into top pipe higher than 120 units mark that
+        # for extra penalty
+        if int(history[0][2].split("_")[1]) > 120:
+            top_pipe_death = True
+        else:
+            top_pipe_death = False
+
         # Q-learning score updates
         t = 1
         for experience in history:
@@ -69,6 +76,9 @@ class Agent(object):
             # Select reward
             if t == 1 or t == 2:
                 cur_reward = self.reward[1]
+            elif top_pipe_death and act:
+                cur_reward = self.reward[1]
+                top_pipe_death = False
             else:
                 cur_reward = self.reward[0]
 
@@ -91,8 +101,8 @@ class Agent(object):
         """
         if self.debug:
             print(f"Xdif: {xdif};  Ydif: {ydif};   Vel: {vel}")
-        xdif = int(xdif) - (int(xdif) % 10)
-        ydif = int(ydif) - (int(ydif) % 10)
+        xdif = int(xdif) - (int(xdif) % 5)
+        ydif = int(ydif) - (int(ydif) % 5)
 
         state = str(int(xdif)) + "_" + str(int(ydif)) + "_" + str(vel)
         if self.debug:

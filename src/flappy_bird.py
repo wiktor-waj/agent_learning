@@ -4,20 +4,7 @@ import sys
 import random
 import pygame
 import argparse
-import matplotlib
-import matplotlib.pyplot as plt
 from agent import Agent
-
-# settings for matplotlib so we can export graphs to latex
-matplotlib.use("pgf")
-matplotlib.rcParams.update(
-    {
-        "pgf.texsystem": "pdflatex",
-        "font.family": "serif",
-        "text.usetex": True,
-        "pgf.rcfonts": False,
-    }
-)
 
 
 # load images and their sizes
@@ -30,9 +17,16 @@ BIRD_IMAGES_PATH = (
     "assets/img/bird_midflap.png",
     "assets/img/bird_downflap.png",
 )
+BIRD_IMAGES = (
+    pygame.image.load(BIRD_IMAGES_PATH[0]),
+    pygame.image.load(BIRD_IMAGES_PATH[1]),
+    pygame.image.load(BIRD_IMAGES_PATH[2])
+)
 PIPE_IMAGE_PATH = "assets/img/pipe.png"
 RESTART_IMAGE_PATH = "assets/img/restart.png"
 RESTART_IMAGE = pygame.image.load(RESTART_IMAGE_PATH)
+PIPE_IMAGE = pygame.image.load(PIPE_IMAGE_PATH)
+PIPE_IMAGE_UPSIDE_DOWN = pygame.transform.flip(PIPE_IMAGE, False, True)
 
 # set screen size based on background and base
 SCREEN_WIDTH = BACKGROUND_WIDTH
@@ -105,31 +99,17 @@ def append_scores(scores, scores_avarages, score):
 def end_game(scores, scores_avarages):
     """Dumping agent's qvalues, creating plotted graphs and ending the game"""
     agent.dump_qvalues(force=True)
+    save_data_to_text_file(scores, scores_avarages)
     pygame.quit()
-    y = scores
-    x = [i + 1 for i in range(len(y))]
+    sys.exit()
+
+def save_data_to_text_file(scores, scores_avarages):
+    """Saves (game -> score) array to text file"""
     max_score = max(scores)
     max_game_index = scores.index(max_score) + 1
     if DEBUG:
         print(f"Max score {max_score} at game {max_game_index}")
         print(f"Avarage at the end: {scores_avarages[-1]}")
-    plt.scatter(x, y, color="black", marker=".", s=20)
-    plt.scatter(
-        max_game_index,
-        max_score,
-        color="red",
-        marker=".",
-        s=60,
-        label=f"Max score",
-    )
-    plt.plot(x, scores_avarages, color="blue", label="Avarage", linewidth=2)
-    plt.xlabel("Game")
-    plt.ylabel("Score")
-    # plt.xticks(x)
-    # plt.yticks(scores)
-    plt.legend()
-    plt.savefig("data/scores.png", dpi=400)
-    plt.savefig("data/scores.pgf")
     with open("data/scores.txt", 'w', encoding = 'utf-8') as f:
         f.write(f"Max score: {max_score} at game: {max_game_index}\n")
         f.write(f"Avarage at the end: {scores_avarages[-1]}\n")
@@ -137,8 +117,6 @@ def end_game(scores, scores_avarages):
         f.write(f"{scores}\n")
         f.write("Avarages:\n")
         f.write(f"{scores_avarages}")
-    sys.exit()
-
 
 def generate_pipes(bottom_pipe_group, top_pipe_group, PIPE_GAP):
     """Generates two new pipes"""
@@ -158,8 +136,8 @@ class Bird(pygame.sprite.Sprite):
         self.images = []
         self.index = 0
         self.counter = 0
-        for bird_image_path in BIRD_IMAGES_PATH:
-            self.images.append(pygame.image.load(bird_image_path))
+        for bird_image in BIRD_IMAGES:
+            self.images.append(bird_image)
         self.image = self.images[self.index]
         # create a rectangle of boundaries based on the image
         self.rect = self.image.get_rect()
@@ -221,12 +199,12 @@ class Pipe(pygame.sprite.Sprite):
 
     def __init__(self, x, y, position, PIPE_GAP):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(PIPE_IMAGE_PATH)
+        self.image = PIPE_IMAGE
         self.rect = self.image.get_rect()
         # position 1 is from the top, -1 is from the bottom
         if position == 1:
             # flip the pipe
-            self.image = pygame.transform.flip(self.image, False, True)
+            self.image = PIPE_IMAGE_UPSIDE_DOWN
             self.rect.bottomleft = [x, y - int(PIPE_GAP / 2)]
         if position == -1:
             self.rect.topleft = [x, y + int(PIPE_GAP / 2)]
@@ -286,6 +264,9 @@ def mainGame():
     WAS_PIPE_PASSED = (
         False  # variable for tracking score, tracks wheter bird passed a pipe
     )
+    # variables for tracking saving graphs
+    last_game_plots_were_saved = 0
+    were_plots_saved = False
     # define font for displaying score
     font = pygame.font.SysFont("Fira Mono", 60)
     # define colors
@@ -420,6 +401,14 @@ def mainGame():
         # end game if we have reached game iterations
         if agent.game_count == ITER:
             end_game(scores, scores_avarages)
+        # save current data
+        if agent.game_count % 250 == 0 and agent.game_count != ITER and agent.game_count > 1 and were_plots_saved == False:
+            print(f"SAVING DATA ON GAME {agent.game_count}")
+            save_data_to_text_file(scores, scores_avarages)
+            were_plots_saved = True
+            last_game_plots_were_saved = agent.game_count
+        if last_game_plots_were_saved != agent.game_count:
+            were_plots_saved = False
 
         # update everything that has happened to the game
         pygame.display.update()

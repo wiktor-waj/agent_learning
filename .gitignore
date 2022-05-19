@@ -1,4 +1,6 @@
 venv/
 PyGame-Learning-Environment
 .python-version
+scores.png
+scores.pgf
 *pycache*
