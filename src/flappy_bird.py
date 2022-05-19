@@ -4,20 +4,7 @@ import sys
 import random
 import pygame
 import argparse
-import matplotlib
-import matplotlib.pyplot as plt
 from agent import Agent
-
-# settings for matplotlib so we can export graphs to latex
-matplotlib.use("pgf")
-matplotlib.rcParams.update(
-    {
-        "pgf.texsystem": "pdflatex",
-        "font.family": "serif",
-        "text.usetex": True,
-        "pgf.rcfonts": False,
-    }
-)
 
 
 # load images and their sizes
@@ -112,37 +99,17 @@ def append_scores(scores, scores_avarages, score):
 def end_game(scores, scores_avarages):
     """Dumping agent's qvalues, creating plotted graphs and ending the game"""
     agent.dump_qvalues(force=True)
-    save_data_to_plot(scores, scores_avarages)
+    save_data_to_text_file(scores, scores_avarages)
     pygame.quit()
     sys.exit()
 
-def save_data_to_plot(scores, scores_avarages):
-    y = scores
-    x = [i + 1 for i in range(len(y))]
+def save_data_to_text_file(scores, scores_avarages):
+    """Saves (game -> score) array to text file"""
     max_score = max(scores)
     max_game_index = scores.index(max_score) + 1
     if DEBUG:
         print(f"Max score {max_score} at game {max_game_index}")
         print(f"Avarage at the end: {scores_avarages[-1]}")
-    plt.scatter(x, y, color="black", marker=".", s=20)
-    plt.scatter(
-        max_game_index,
-        max_score,
-        color="red",
-        marker=".",
-        s=60,
-        label=f"Max score",
-    )
-    plt.plot(x, scores_avarages, color="blue", label="Avarage", linewidth=2)
-    plt.xlabel("Game")
-    plt.ylabel("Score")
-    # plt.xticks(x)
-    # plt.yticks(scores)
-    plt.legend()
-    plt.savefig("data/scores.png", dpi=400)
-    plt.savefig("data/scores.pgf")
-    plt.clf()
-    plt.cla()
     with open("data/scores.txt", 'w', encoding = 'utf-8') as f:
         f.write(f"Max score: {max_score} at game: {max_game_index}\n")
         f.write(f"Avarage at the end: {scores_avarages[-1]}\n")
@@ -437,7 +404,7 @@ def mainGame():
         # save current data
         if agent.game_count % 250 == 0 and agent.game_count != ITER and agent.game_count > 1 and were_plots_saved == False:
             print(f"SAVING DATA ON GAME {agent.game_count}")
-            save_data_to_plot(scores, scores_avarages)
+            save_data_to_text_file(scores, scores_avarages)
             were_plots_saved = True
             last_game_plots_were_saved = agent.game_count
         if last_game_plots_were_saved != agent.game_count:
