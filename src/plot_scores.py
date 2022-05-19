@@ -22,6 +22,7 @@ matplotlib.rcParams.update(
     }
 )
 
+
 def weighted_avarage_last_100_scores(index, scores, weights):
     weighted_avarage = 0
     for i in range(100):
@@ -39,10 +40,11 @@ def calculate_avarages(scores):
     avarages = []
     for i, score in enumerate(scores):
         if i < 100:
-            avarages.append(sum(scores[:i + 1]) / len(scores[:i + 1]))
+            avarages.append(sum(scores[: i + 1]) / len(scores[: i + 1]))
         else:
             avarages.append(weighted_avarage_last_100_scores(i, scores, weights))
     return avarages
+
 
 def plot_scores(scores, avarages, destination):
     """Plots (game -> score) and avarages and saves the figure"""
@@ -51,7 +53,7 @@ def plot_scores(scores, avarages, destination):
     max_score_index = scores.index(max_score) + 1
     y = scores
     x = [i + 1 for i in range(len(y))]
-    plt.rc('grid', linestyle="dotted")
+    plt.rc("grid", linestyle="dotted")
     plt.scatter(x, y, color="black", marker=".", s=1)
     plt.scatter(
         max_score_index,
@@ -69,17 +71,19 @@ def plot_scores(scores, avarages, destination):
     plt.savefig(destination + "scores.png", dpi=400)
     plt.savefig(destination + "scores.pgf")
 
+
 def save_data_to_text_file(scores, scores_avarages, destination):
     """Saves (game -> score) array to text file"""
     max_score = max(scores)
     max_game_index = scores.index(max_score) + 1
-    with open(destination + "scores.txt", 'w', encoding = 'utf-8') as f:
+    with open(destination + "scores.txt", "w", encoding="utf-8") as f:
         f.write(f"Max score: {max_score} at game: {max_game_index}\n")
         f.write(f"Avarage at the end: {scores_avarages[-1]}\n")
         f.write("Scores:\n")
         f.write(f"{scores}\n")
         f.write("Avarages:\n")
         f.write(f"{scores_avarages}")
+
 
 def main():
     parser = argparse.ArgumentParser("plot_scores.py")
@@ -98,8 +102,8 @@ def main():
     arguments = parser.parse_args()
     source = arguments.source
     destination = arguments.destination
-    if destination[-1] != '/':
-        destination += '/'
+    if destination[-1] != "/":
+        destination += "/"
     if not os.path.exists(os.path.dirname(destination)):
         os.makedirs(os.path.dirname(destination))
 

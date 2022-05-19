@@ -20,7 +20,7 @@ BIRD_IMAGES_PATH = (
 BIRD_IMAGES = (
     pygame.image.load(BIRD_IMAGES_PATH[0]),
     pygame.image.load(BIRD_IMAGES_PATH[1]),
-    pygame.image.load(BIRD_IMAGES_PATH[2])
+    pygame.image.load(BIRD_IMAGES_PATH[2]),
 )
 PIPE_IMAGE_PATH = "assets/img/pipe.png"
 RESTART_IMAGE_PATH = "assets/img/restart.png"
@@ -103,6 +103,7 @@ def end_game(scores, scores_avarages):
     pygame.quit()
     sys.exit()
 
+
 def save_data_to_text_file(scores, scores_avarages):
     """Saves (game -> score) array to text file"""
     max_score = max(scores)
@@ -110,13 +111,14 @@ def save_data_to_text_file(scores, scores_avarages):
     if DEBUG:
         print(f"Max score {max_score} at game {max_game_index}")
         print(f"Avarage at the end: {scores_avarages[-1]}")
-    with open("data/scores.txt", 'w', encoding = 'utf-8') as f:
+    with open("data/scores.txt", "w", encoding="utf-8") as f:
         f.write(f"Max score: {max_score} at game: {max_game_index}\n")
         f.write(f"Avarage at the end: {scores_avarages[-1]}\n")
         f.write("Scores:\n")
         f.write(f"{scores}\n")
         f.write("Avarages:\n")
         f.write(f"{scores_avarages}")
+
 
 def generate_pipes(bottom_pipe_group, top_pipe_group, PIPE_GAP):
     """Generates two new pipes"""
@@ -402,7 +404,12 @@ def mainGame():
         if agent.game_count == ITER:
             end_game(scores, scores_avarages)
         # save current data
-        if agent.game_count % 250 == 0 and agent.game_count != ITER and agent.game_count > 1 and were_plots_saved == False:
+        if (
+            agent.game_count % 250 == 0
+            and agent.game_count != ITER
+            and agent.game_count > 1
+            and were_plots_saved == False
+        ):
             print(f"SAVING DATA ON GAME {agent.game_count}")
             save_data_to_text_file(scores, scores_avarages)
             were_plots_saved = True
