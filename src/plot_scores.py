@@ -28,9 +28,11 @@ def weighted_avarage_last_100_scores(index, scores, weights):
 
 def calculate_avarages(scores):
     """Takes scores list and returns weighted avarages"""
-    weights = [
-        (math.sin(math.pi * (i / 100) - math.pi / 2) + 1) / 2 for i in range(1, 101)
-    ]
+    # sin approach is not good unfortunately :(
+    #weights = [
+        #(math.sin(math.pi * (i / 100) - math.pi / 2) + 1) / 2 for i in range(1, 101)
+    #]
+    weights = [1 for i in range(1,101)]
     weights.reverse()
     avarages = []
     for i, score in enumerate(scores):
